@@ -7,7 +7,7 @@ namespace HelloWorldApp.Controllers
         public IActionResult Index()
         {
             ViewData["Version"] = Program.Version;
-            ViewData["Version"] = Environment.MachineName;
+            ViewData["MachineName"] = Environment.MachineName;
             return View();
         }
     }
