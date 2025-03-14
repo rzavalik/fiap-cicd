@@ -16,7 +16,7 @@ data "aws_s3_object" "ssh_key" {
 }
 
 resource "aws_key_pair" "ssh_key" {
-  key_name   = "my-ssh-key"
+  key_name   = "ssh-key"
   public_key = data.aws_s3_object.ssh_key.body
 }
 
@@ -55,7 +55,7 @@ resource "aws_instance" "helloworld_app" {
   subnet_id     = aws_subnet.main.id
   security_groups = [aws_security_group.allow_all.name]
   
-  key_name = aws_key_pair.ssh_key.key_name
+  key_name = aws_key_pair.key_name
   
   # Associate the instance with the created subnet
   associate_public_ip_address = true
