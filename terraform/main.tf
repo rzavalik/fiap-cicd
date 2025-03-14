@@ -17,7 +17,7 @@ data "aws_s3_object" "ssh_key" {
 
 resource "aws_key_pair" "ssh_key" {
   key_name   = "ssh-key"
-  public_key = data.aws_s3_object.ssh_key.body
+  public_key = data.aws_s3_object.ssh_key.bucket
 }
 
 resource "aws_vpc" "main" {
