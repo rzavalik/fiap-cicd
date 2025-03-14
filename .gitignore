@@ -9,3 +9,4 @@ project.fragment.lock.json
 *.sln.docstates
 .terraform.lock.hcl
 .terraform/
+.vs/
