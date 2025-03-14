@@ -1,6 +1,14 @@
 version: 0.2
 
 phases:
+  install:
+    commands:
+      - echo Installing Terraform...
+      - curl -LO https://github.com/hashicorp/terraform/releases/download/v1.1.7/terraform_1.1.7_linux_amd64.zip
+      - unzip terraform_1.1.7_linux_amd64.zip
+      - sudo mv terraform /usr/local/bin/
+      - terraform --version
+
   pre_build:
     commands:
       - echo Logging into Amazon ECR...
@@ -16,6 +24,10 @@ phases:
     commands:
       - echo Pushing the Docker image to ECR...
       - docker push $ECR_URI:latest
+      - echo Running Terraform to deploy infrastructure...
+      - cd terraform
+      - terraform init
+      - terraform apply -auto-approve
 
 artifacts:
   files: '**/*'
