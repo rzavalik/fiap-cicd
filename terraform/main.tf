@@ -13,7 +13,7 @@ provider "aws" {
 # Fetch the SSH public key from S3
 data "aws_s3_bucket_object" "ssh_key" {
   bucket = "zavalik-terraformstate"
-  key    = "ssh/my-ssh-key.pub"
+  key    = "ssh/id_rsa.pub"
 }
 
 # Create an SSH key pair for EC2 access using the retrieved public key
