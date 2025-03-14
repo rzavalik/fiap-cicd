@@ -10,30 +10,26 @@ provider "aws" {
   region = var.aws_region
 }
 
-# Fetch the SSH public key from S3
-data "aws_s3_bucket_object" "ssh_key" {
+data "aws_s3_object" "ssh_key" {
   bucket = "zavalik-terraformstate"
   key    = "ssh/id_rsa.pub"
 }
 
-# Create an SSH key pair for EC2 access using the retrieved public key
 resource "aws_key_pair" "ssh_key" {
   key_name   = "my-ssh-key"
-  public_key = data.aws_s3_bucket_object.ssh_key.body
+  public_key = data.aws_s3_object.ssh_key.body
 }
 
-# Create a VPC
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
   enable_dns_support = true
   enable_dns_hostnames = true
 }
 
-# Create a subnet in the VPC
 resource "aws_subnet" "main" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
+  availability_zone       = var.availability_zone
   map_public_ip_on_launch = true
   tags = {
     Name = "main-subnet"
