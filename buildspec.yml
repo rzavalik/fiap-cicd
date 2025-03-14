@@ -4,6 +4,12 @@ phases:
   install:
     runtime-versions:
       docker: 18
+    commands:
+      - echo Installing Docker...
+      - curl -fsSL https://get.docker.com -o get-docker.sh
+      - sudo sh get-docker.sh
+      - sudo usermod -aG docker $USER
+
   pre_build:
     commands:
       - echo Logging into Amazon ECR...
