@@ -16,10 +16,17 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = true
 }
 
-resource "aws_subnet" "main" {
+resource "aws_subnet" "main_az1" {
   vpc_id                  = aws_vpc.main.id
   cidr_block              = "10.0.1.0/24"
-  availability_zone       = var.availability_zone
+  availability_zone       = "${var.aws_region}a"
+  map_public_ip_on_launch = true
+}
+
+resource "aws_subnet" "main_az2" {
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = "10.0.2.0/24"
+  availability_zone       = "${var.aws_region}b"
   map_public_ip_on_launch = true
 }
 
@@ -37,8 +44,13 @@ resource "aws_route" "internet" {
   gateway_id             = aws_internet_gateway.main.id
 }
 
-resource "aws_route_table_association" "main" {
-  subnet_id      = aws_subnet.main.id
+resource "aws_route_table_association" "main_az1" {
+  subnet_id      = aws_subnet.main_az1.id
+  route_table_id = aws_route_table.main.id
+}
+
+resource "aws_route_table_association" "main_az2" {
+  subnet_id      = aws_subnet.main_az2.id
   route_table_id = aws_route_table.main.id
 }
 
@@ -109,19 +121,60 @@ resource "aws_iam_instance_profile" "ec2_ecr_profile" {
   role = aws_iam_role.ec2_ecr_role.name
 }
 
-resource "aws_instance" "helloworld_app" {
-  ami                    = var.ec2_ami
-  instance_type          = "t2.micro"
-  subnet_id              = aws_subnet.main.id
-  security_groups        = [aws_security_group.allow_all.id]
-  associate_public_ip_address = true
-  iam_instance_profile   = aws_iam_instance_profile.ec2_ecr_profile.name
-  metadata_options {
-    http_endpoint = "enabled"
-    http_tokens   = "optional"
+# Load Balancer
+resource "aws_lb" "main" {
+  name               = "helloworld-alb"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.allow_all.id]
+  subnets            = [aws_subnet.main_az1.id, aws_subnet.main_az2.id] 
+
+  enable_deletion_protection = false
+  enable_cross_zone_load_balancing = true
+}
+
+resource "aws_lb_target_group" "main" {
+  name     = "helloworld-tg"
+  port     = 80
+  protocol = "HTTP"
+  vpc_id   = aws_vpc.main.id
+
+  health_check {
+    path                = "/"
+    interval            = 30
+    timeout             = 5
+    healthy_threshold   = 3
+    unhealthy_threshold = 3
+  }
+}
+
+resource "aws_lb_listener" "main" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 80
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.main.arn
+  }
+}
+
+# Launch Template (instead of Launch Configuration)
+resource "aws_launch_template" "helloworld-app" {
+  name          = "helloworld-app-config"
+  image_id      = var.ec2_ami
+  instance_type = "t2.micro"
+
+  network_interfaces {
+    security_groups = [aws_security_group.allow_all.id] 
+    associate_public_ip_address = true
   }
 
-  user_data = <<-EOF
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2_ecr_profile.name
+  }
+
+  user_data = base64encode(<<-EOF
               #!/bin/bash
               sudo apt update -y
 
@@ -145,10 +198,32 @@ resource "aws_instance" "helloworld_app" {
               sudo docker pull ${var.ecr_uri}:latest
               sudo docker run -d -p 80:8080 --name helloworld_app ${var.ecr_uri}:latest
               EOF
+  )
 
-  depends_on = [aws_security_group.allow_all]
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
-output "instance_public_ip" {
-  value = aws_instance.helloworld_app.public_ip
+# Auto Scaling Group
+resource "aws_autoscaling_group" "helloworld-app" {
+  desired_capacity     = 2
+  max_size             = 3
+  min_size             = 1
+  vpc_zone_identifier  = [aws_subnet.main_az1.id, aws_subnet.main_az2.id]
+  launch_template {
+    id      = aws_launch_template.helloworld-app.id
+    version = "$Latest"
+  }
+
+  target_group_arns = [aws_lb_target_group.main.arn]
+  
+  health_check_type          = "ELB"
+  health_check_grace_period  = 300
+  wait_for_capacity_timeout  = "0"
+}
+
+output "alb_dns_name" {
+  value = aws_lb.main.dns_name
+  description = "The DNS name of the ALB"
 }

@@ -2,10 +2,6 @@ variable "aws_region" {
   default = "us-east-1"
 }
 
-variable "availability_zone" {
-  default = "us-east-1a"
-}
-
 variable "ecr_uri" {
   default = "588738580149.dkr.ecr.us-east-1.amazonaws.com/master-ecr"
 }
