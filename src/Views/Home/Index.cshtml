@@ -1,23 +1,30 @@
 @{
-    ViewData["Title"] = "Hello World";
-    Layout = "_Layout";
+	ViewData["Title"] = "Hello World";
+	Layout = "_Layout";
 }
 <div class="p-5 mb-4 bg-body-tertiary rounded-3">
-    <div class="container-fluid py-5">
-        <h1 class="display-5 fw-bold">CI / CD</h1>
-        <p class="col-md-8 fs-4">
-            Esta aplicação usa GitHub como repositório base.
-            Toda vez que um merge na master é executado, a aplicação AWS no GitHub executa uma chamada para o AWS CodeBuild.
-            O CodeBuild, por sua vez, compila, e salva o container no ECR. Se obtiver sucesso, o CodeBuild inicializa o Terraform para aplicar a atualização na infraestrutura.
-        </p>
-    </div>
+	<div class="container-fluid py-5">
+		<h1 class="display-5 fw-bold">CI / CD</h1>
+		<p class="col-md-8 fs-4">
+			Esta aplica&ccedil;&atilde;o usa GitHub como reposit&oacute;rio base.
+			Toda vez que um merge na master &eacute; executado, a aplica&ccedil;&atilde;o AWS no GitHub executa uma chamada para o AWS CodeBuild.
+			O CodeBuild, por sua vez, compila, e salva o container no ECR. Se obtiver sucesso, o CodeBuild inicializa o Terraform para aplicar a atualiza&ccedil;&atilde;o na infraestru­tura.
+		</p>
+	</div>
 </div>
 
 <div class="row align-items-md-stretch">
-    <div class="col-md-6">
-        <div class="h-100 p-5 text-bg-dark rounded-3">
-            <h2>Números da Versão</h2>
-            <p>Durante o processo de Build, o sistema usa informações de data e hora para estampar o Build.</p>
-        </div>
-    </div>
+	<a href="/Content/Images/DeploymentProccess.svg" target="_blank">
+		<img src="/Content/Images/DeploymentProccess.svg" alt="Processo de Deploy" class="col-md-5 img img-fluid rounded" />
+	</a>
+	<a href="/Content/Images/CurrentDesign.svg" target="_blank">
+		<img src="/Content/Images/CurrentDesign.svg" alt="Infraestrutura Atual" class="col-md-3 img img-fluid rounded" />
+	</a>
+	<div class="col-md-3">
+		<div class="h-100 p-5 rounded-3">
+			<h4>N&uacute;meros da Vers&atilde;o</h4>
+			<p class="small">Durante o processo de Build, o sistema usa informa&ccedil;&otilde;es de data e hora para estampar o Build.</p>
+			<p class="small">Confira no rodap&eacute; a vers&atilde;o.</p>
+		</div>
+	</div>
 </div>

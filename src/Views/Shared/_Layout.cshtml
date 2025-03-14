@@ -74,7 +74,10 @@
             <div>
                 @RenderBody()
             </div>
-            <footer class="pt-3 mt-4 text-body-secondary border-top">@ViewData["Version"]</footer>
+            <footer class="pt-3 mt-4 text-body-secondary border-top">
+                @ViewData["Version"] - 
+                @ViewData["MachineName"]
+            </footer>
         </div>
     </main>
     <script src="https://getbootstrap.com/docs/5.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

@@ -208,7 +208,7 @@ resource "aws_launch_template" "helloworld-app" {
 # Auto Scaling Group
 resource "aws_autoscaling_group" "helloworld-app" {
   desired_capacity     = 2
-  max_size             = 3
+  max_size             = 4
   min_size             = 1
   vpc_zone_identifier  = [aws_subnet.main_az1.id, aws_subnet.main_az2.id]
   launch_template {
@@ -221,6 +221,11 @@ resource "aws_autoscaling_group" "helloworld-app" {
   health_check_type          = "ELB"
   health_check_grace_period  = 300
   wait_for_capacity_timeout  = "0"
+  force_delete               = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 output "alb_dns_name" {
