@@ -1,13 +1,13 @@
-provider "aws" {
-  region = "us-east-1"
-}
-
 terraform {
   backend "s3" {
     bucket = "terraform-state-bucket"
     key    = "state/terraform.tfstate"
-    region = var.aws_region
+    region = "us-east-1"
   }
+}
+
+provider "aws" {
+  region = var.aws_region
 }
 
 resource "aws_security_group" "allow_all" {
