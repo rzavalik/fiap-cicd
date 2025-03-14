@@ -164,6 +164,7 @@ resource "aws_launch_template" "helloworld-app" {
   name          = "helloworld-app-config"
   image_id      = var.ec2_ami
   instance_type = "t2.micro"
+  update_default_version = true
 
   network_interfaces {
     security_groups = [aws_security_group.allow_all.id] 
