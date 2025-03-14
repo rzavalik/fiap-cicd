@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <BuildYear>$([System.DateTime]::Now.ToString("yy"))</BuildYear>
+    <BuildMonth>$([System.DateTime]::Now.ToString("MM"))</BuildMonth>
+    <BuildDay>$([System.DateTime]::Now.ToString("dd"))</BuildDay>
+    <BuildHour>$([System.DateTime]::Now.ToString("HH"))</BuildHour>
+    <BuildMinute>$([System.DateTime]::Now.ToString("mm"))</BuildMinute>
+  </PropertyGroup>
+</Project>
