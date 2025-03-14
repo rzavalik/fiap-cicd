@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "terraform-state-bucket"
+    bucket = "zavalik-terraformstate"
     key    = "state/terraform.tfstate"
     region = "us-east-1"
   }
