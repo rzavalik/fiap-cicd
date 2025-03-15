@@ -8,4 +8,15 @@ Esta aplicação usa GitHub como repositório base. Toda vez que um merge na mas
 
 ## Tecnologias
 
-.NET C# | AWS | Terraform | AWS | GITHUB | GIT | CSS | JS
+<div align="left">
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/dot-net/dot-net-plain-wordmark.svg" height="40" alt=".NET"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" height="40" alt="AWS"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-plain-wordmark.svg" height="40" alt="Docker"  />
+  <img width="12" />
+  <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" height="40" alt="GitHub"  />
+</div>
+
+
+Veja em [http://helloworld-alb-1332269203.us-east-1.elb.amazonaws.com/]
