@@ -189,8 +189,8 @@ resource "aws_launch_template" "helloworld-app" {
 
               # Executa a app
               sudo aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${var.ecr_uri}
-              sudo docker pull ${var.ecr_uri}:latest
-              sudo docker run -d -p 80:8080 --name helloworld_app ${var.ecr_uri}:latest
+              sudo docker pull ${var.ecr_uri}:helloworld-latest
+              sudo docker run -d -p 80:8080 --name helloworld_app ${var.ecr_uri}:helloworld-latest
               EOF
   )
 
