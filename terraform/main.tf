@@ -10,10 +10,21 @@ provider "aws" {
   region = var.aws_region
 }
 
+# SSH Shared Key
+resource "aws_s3_object" "ssh_key" {
+  bucket = "zavalik-terraformstate"
+  key    = "swarm-cluster/id_rsa"            
+  acl    = "private"               
+  source = "~/.ssh/id_rsa"         
+}
+
 resource "aws_vpc" "main" {
   cidr_block = "10.0.0.0/16"
   enable_dns_support = true
   enable_dns_hostnames = true
+  tags = {
+    Name = "CI/CD"
+  }
 }
 
 resource "aws_subnet" "main_az1" {
@@ -21,6 +32,9 @@ resource "aws_subnet" "main_az1" {
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = true
+  tags = {
+    Name = "CI/CD SubnetA"
+  }
 }
 
 resource "aws_subnet" "main_az2" {
@@ -28,14 +42,23 @@ resource "aws_subnet" "main_az2" {
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "${var.aws_region}b"
   map_public_ip_on_launch = true
+  tags = {
+    Name = "CI/CD SubnetB"
+  }
 }
 
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
+  tags = {
+    Name = "CI/CD IGW"
+  }
 }
 
 resource "aws_route_table" "main" {
   vpc_id = aws_vpc.main.id
+  tags = {
+    Name = "CI/CD RTB"
+  }
 }
 
 resource "aws_route" "internet" {
@@ -54,7 +77,7 @@ resource "aws_route_table_association" "main_az2" {
   route_table_id = aws_route_table.main.id
 }
 
-resource "aws_security_group" "allow_all" {
+resource "aws_security_group" "cicd_allow_sg" {
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -119,7 +142,7 @@ resource "aws_lb" "main" {
   name               = "helloworld-alb"
   internal           = false
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.allow_all.id]
+  security_groups    = [aws_security_group.cicd_allow_sg.id]
   subnets            = [aws_subnet.main_az1.id, aws_subnet.main_az2.id] 
 
   enable_deletion_protection = false
@@ -160,12 +183,20 @@ resource "aws_launch_template" "helloworld-app" {
   update_default_version = true
 
   network_interfaces {
-    security_groups = [aws_security_group.allow_all.id] 
+    security_groups = [aws_security_group.cicd_allow_sg.id] 
     associate_public_ip_address = true
   }
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ec2_ecr_profile.name
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+
+    tags = {
+      Name = "CI/CD WorkerNode"
+    }
   }
 
   user_data = base64encode(<<-EOF
@@ -181,11 +212,21 @@ resource "aws_launch_template" "helloworld-app" {
               sudo systemctl start docker
               sudo systemctl enable docker
               sudo usermod -aG docker $USER
+              sudo newgrp docker
+              sudo chown root:docker /var/run/docker.sock
+              sudo chmod 660 /var/run/docker.sock
 
               # Instala o AWS CLI
               sudo curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
               sudo unzip -q awscliv2.zip
               sudo ./aws/install
+
+              # Ativa a chave SSH
+              sudo mkdir -p /home/ubuntu/.ssh
+              sudo aws s3 cp s3://zavalik-terraformstate/swarm-cluster/id_rsa /home/ubuntu/.ssh/id_rsa
+              sudo chmod 600 /home/ubuntu/.ssh/id_rsa
+              sudo chown ubuntu:ubuntu /home/ubuntu/.ssh/id_rsa
+              sudo systemctl restart ssh
 
               # Executa a app
               sudo aws ecr get-login-password --region ${var.aws_region} | docker login --username AWS --password-stdin ${var.ecr_uri}
